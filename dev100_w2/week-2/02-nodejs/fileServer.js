@@ -15,14 +15,47 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const bodyParser = require('body-parser')
+
 const app = express();
 
-app.get("/", (req, res) => {
+app.use(bodyParser.json())
 
-  console.log("Inside")
-  console.log(req);
-  
+app.get("/files", (req, res) => {
+  fs.readdir('./files/', (err, files) => {
+    if (err) throw err
+    res.json(files)
+  })
+
+
 })
 
+
+app.get("/file/:filename", (req, res) => {
+  const fileName = req.params['filename']
+
+  fs.readdir('./files/', (err, files) => {
+    if (err) throw err
+    if(files.includes(fileName)){
+
+      
+      fs.readFile(`./files/${fileName}`, "utf-8", (error, data) => {
+        if(error) throw error
+        res.send(data)
+      })
+
+    } else {
+      res.status(404).send('File not found')
+    }
+  })
+
+
+})
+
+app.all('*', (req, res) => {
+  res.status(404).send('Route not found');
+});
+
+// app.listen(3000)
 
 module.exports = app;
