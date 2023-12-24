@@ -17,5 +17,12 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 
+app.get("/", (req, res) => {
+
+  console.log("Inside")
+  console.log(req);
+  
+})
+
 
 module.exports = app;
