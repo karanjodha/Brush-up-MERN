@@ -50,8 +50,8 @@ const app = express();
 app.use(bodyParser.json());
 
 app.get("/todos", (req, res) => {
-  fs.readFile("../todos.json", "utf-8", (err, data) => {
-    if(err) {
+  fs.readFile("todos.json", "utf-8", (err, data) => {
+    if (err) {
       throw err
     }
     res.status(200).json(JSON.parse(data))
@@ -59,31 +59,31 @@ app.get("/todos", (req, res) => {
 })
 
 app.get("/todos/:id", (req, res) => {
-    const searchId = req.params['id']
-    // console.log(searchId)
+  const searchId = req.params['id']
+  // console.log(searchId)
 
-    fs.readFile("../todos.json", "utf-8", (err, data) => {
-      if(err) throw err;
+  fs.readFile("todos.json", "utf-8", (err, data) => {
+    if (err) throw err;
 
-      const fileData = JSON.parse(data);
+    const fileData = JSON.parse(data);
 
-      // console.log(fileData)
+    // console.log(fileData)
 
-      const matchEntry = fileData.filter((entry) => {
-        // console.log("Inside:")
-        // console.log(entry)
-        return entry.id == searchId
-      })
-
-      // console.log(matchEntry)
-
-      if(matchEntry.length>0) {
-        res.status(200).json(matchEntry[0])
-      } else {
-        res.status(404).json({})
-      }
-
+    const matchEntry = fileData.filter((entry) => {
+      // console.log("Inside:")
+      // console.log(entry)
+      return entry.id == searchId
     })
+
+    // console.log(matchEntry)
+
+    if (matchEntry.length > 0) {
+      res.status(200).json(matchEntry[0])
+    } else {
+      res.status(404).json({})
+    }
+
+  })
 })
 
 app.post("/todos", (req, res) => {
@@ -93,19 +93,19 @@ app.post("/todos", (req, res) => {
     description: req.body.description
   }
 
-  fs.readFile("../todos.json", "utf-8", (err, data) => {
-    if(err) throw err
+  fs.readFile("todos.json", "utf-8", (err, data) => {
+    if (err) throw err
     // console.log(data)
     // console.log(newTodo)
     const newData = JSON.parse(data)
     newData.push(newTodo);
     // console.log("HERE")
     // console.log(newData)
-    fs.writeFile("../todos.json", JSON.stringify(newData), (error) => {
+    fs.writeFile("todos.json", JSON.stringify(newData), (error) => {
       if (error) {
         throw error
       }
-      res.status(201).json({id: newTodo.id})
+      res.status(201).json({ id: newTodo.id })
     })
   })
 })
@@ -115,25 +115,25 @@ app.put("/todos/:id", (req, res) => {
   // console.log(reqId)
   // console.log(req.body)
 
-  fs.readFile("../todos.json", "utf-8", (err, data) => {
-    if(err) throw err
+  fs.readFile("todos.json", "utf-8", (err, data) => {
+    if (err) throw err
 
     const fileData = JSON.parse(data);
     // console.log(fileData)
 
     let foundIndex = -1
 
-    for(i=0; i< fileData.length;i++) {
-      if(fileData[i].id == reqId) {
+    for (i = 0; i < fileData.length; i++) {
+      if (fileData[i].id == reqId) {
         foundIndex = i
       }
     }
 
     // console.log(foundIndex)
 
-    if(foundIndex !== -1) {
+    if (foundIndex !== -1) {
       // console.log("Inside if")
-      
+
       const updatedEntry = {
         id: fileData[foundIndex].id,
         title: req.body.title,
@@ -145,22 +145,50 @@ app.put("/todos/:id", (req, res) => {
       fileData[foundIndex] = updatedEntry
       // console.log(fileData)
 
-      fs.writeFile("../todos.json", JSON.stringify(fileData), (err) => {
+      fs.writeFile("todos.json", JSON.stringify(fileData), (err) => {
         // console.log("Inside write file")
-        if(err) throw err
+        if (err) throw err
         else res.status(200).json(updatedEntry)
-   
+
       })
- } else {
+    } else {
       res.status(404).json({})
     }
 
   })
-  
+
 })
 
 app.delete("/todos/:id", (req, res) => {
-  res.json({})
+  const searchId = req.params['id']
+
+  fs.readFile("todos.json", "utf-8", (err, data) => {
+    if (err) throw err
+
+    const fileData = JSON.parse(data)
+
+    const updatedData = []
+
+    for (i = 0; i < fileData.length; i++) {
+      if (fileData[i].id != searchId) {
+        // console.log("inside if")
+        updatedData.push(fileData[i])
+      }
+    }
+
+    // console.log("fileData")
+    // console.log(fileData)
+    // console.log(updatedData)
+
+    if(fileData.length != updatedData.length) {
+      fs.writeFile("todos.json", JSON.stringify(updatedData), (error) => {
+        if (error) throw error
+        res.sendStatus(200)
+      })
+    } else {
+      res.sendStatus(404)
+    }
+  })
 })
 
 module.exports = app;
