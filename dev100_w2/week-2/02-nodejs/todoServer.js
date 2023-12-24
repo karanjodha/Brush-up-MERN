@@ -60,22 +60,22 @@ app.get("/todos", (req, res) => {
 
 app.get("/todos/:id", (req, res) => {
     const searchId = req.params['id']
-    console.log(searchId)
+    // console.log(searchId)
 
     fs.readFile("../todos.json", "utf-8", (err, data) => {
       if(err) throw err;
 
       const fileData = JSON.parse(data);
 
-      console.log(fileData)
+      // console.log(fileData)
 
       const matchEntry = fileData.filter((entry) => {
-        console.log("Inside:")
-        console.log(entry)
+        // console.log("Inside:")
+        // console.log(entry)
         return entry.id == searchId
       })
 
-      console.log(matchEntry)
+      // console.log(matchEntry)
 
       if(matchEntry.length>0) {
         res.status(200).json(matchEntry[0])
@@ -111,7 +111,52 @@ app.post("/todos", (req, res) => {
 })
 
 app.put("/todos/:id", (req, res) => {
-  res.json({})
+  const reqId = req.params['id']
+  // console.log(reqId)
+  // console.log(req.body)
+
+  fs.readFile("../todos.json", "utf-8", (err, data) => {
+    if(err) throw err
+
+    const fileData = JSON.parse(data);
+    // console.log(fileData)
+
+    let foundIndex = -1
+
+    for(i=0; i< fileData.length;i++) {
+      if(fileData[i].id == reqId) {
+        foundIndex = i
+      }
+    }
+
+    // console.log(foundIndex)
+
+    if(foundIndex !== -1) {
+      // console.log("Inside if")
+      
+      const updatedEntry = {
+        id: fileData[foundIndex].id,
+        title: req.body.title,
+        description: req.body.description
+      }
+
+      // console.log("filedata")
+      // console.log(fileData)
+      fileData[foundIndex] = updatedEntry
+      // console.log(fileData)
+
+      fs.writeFile("../todos.json", JSON.stringify(fileData), (err) => {
+        // console.log("Inside write file")
+        if(err) throw err
+        else res.status(200).json(updatedEntry)
+   
+      })
+ } else {
+      res.status(404).json({})
+    }
+
+  })
+  
 })
 
 app.delete("/todos/:id", (req, res) => {
